@@ -1,0 +1,629 @@
+Practical 1 & 2: Data collection, Data curation and management for Large-scale Data system (such as MongoDB)
+
+Q1) Create Mongo DataBase
+
+use beginnersbook
+db
+show dbs
+
+Q2) Insert in DB
+
+db.user.insert({name:"Chaitanya", age:"30"})
+show dbs
+
+Q3) Drop DB
+
+db.dropDatabase()
+show dbs
+
+Q4) Creating collection
+
+use beginnersbookdb
+db.beginnersbook.insert({name:"Chaitanya", age:"30", website:"www.google.com"})
+
+Q5) Show collections
+
+show collections
+
+Q6) View collections
+
+db.beginnersbook.find()
+
+Q8) Create collection manually
+
+db.createCollection("teachers",{capped:true,size:9232768})
+
+Q9) Drop collection
+
+db.teachers.drop()
+
+Q10) Inserting Multiple Fields in collection
+
+db.beginnersbook.insert({
+name:"Omkar",
+age:20,
+email:"or123@gmail.com",
+course:[{name:"MonoDB",Duration:7},{name:"Java",Duration:30}]
+})
+
+db.beginnersbook.find()
+
+Q11) Inserting Multiple Doc in collection
+
+var beginners= [ {"StudentID":1001,
+"StudentName":"Steve","age":30},{"StudentID":1002,
+"StudentName":"nege","age":40},{"StudentID":3333,
+"StudentName":"rick","age":50}]
+db.students.insert(beginners);
+db.students.find()
+
+Q12) Viewing in JavaScript format
+
+db.students.find().forEach(printjson)
+db.students.find({StudentName:"Steve"}).pretty()
+
+Q13) Greater and Less Than
+
+db.students.find({"age":{$gt:32}}).pretty()
+db.students.find({"age":{$lt:32}}).pretty()
+db.students.find({"age":{$lte:40}}).pretty()
+db.students.find({"age":{$gte:40}}).pretty()
+db.students.find({"age":{$ne:40}}).pretty()
+
+Q14) Update Doc
+
+db.students.update({"StudentName":"Steve"},{$set:{"StudentName":"Jhon"}})
+db.students.find()
+
+Q15) Saving Doc
+
+db.students.save({
+"_id" : ObjectId("5c383475683d8084043ccb08"),
+"StudentID" : 1001,
+"StudentName" : "Rocky",
+"age" : 30
+})
+db.students.find()
+
+Q16) Delete Doc
+
+db.students.remove({"age":50})
+db.students.find()
+
+Q17) Particular Columns
+
+db.students.find({},{"_id":0,"StudentID":1})
+
+Q18) Limit And Skip
+
+db.students.find({"StudentID":{$gt:1000}}).limit(1).skip(1).pretty()
+
+Q19) Sorting
+
+db.students.find({},{"_id":0,"StudentID":1}).sort({})
+db.students.find().sort({})
+
+Q20) Creating Index
+
+db.students.createIndex({"StudentName":1})
+
+Q21) Get INDEX
+
+db.students.getIndexes()
+
+Q22) Drop index
+
+db.students.dropIndex({"StudentName":1})
+
+Q23) Drop All Index
+
+db.students.dropIndexes()
+
+____________________________________________________
+
+Practical 3: Principal Component Analsis
+
+data("iris")
+data_iris <- iris[1:4]
+Cov_data <- cov(data_iris)
+Eigen_data <- eigen(Cov_data)
+Eigen_data$values
+
+PCA_data <- princomp(data_iris ,cor="False")
+PCA_data$dev^2
+
+PCA_data$loadings[,1:4]
+
+Eigen_data$vectors
+
+summary(PCA_data)
+
+biplot(PCA_data)
+
+screeplot(PCA_data, type ="lines")
+
+
+Conclusion:
+The graphical representation of the scree plot helps us to
+understand that the component 1 has the highest contribution in
+the calculation of the PCA followed by component 2 whereas the
+rest two components gives least contribution.
+On studying the Proportion of variance given by summery () tells
+us that component 1 gives maximum contribution of 92.47 %
+followed by component 2 with 5.30% and rest two with least
+contribution of 1.7% and 0.5%.
+So we can omit the last two components yet having an overall acc
+uracy of 97.76 %.
+
+____________________________________________________
+
+Practical 5: Time-series forecasting
+
+library(hflights)
+library(data.table)
+dt<-data.table(hflights)
+dt[,date:=ISOdate(Year, Month, DayofMonth)]
+daily<-dt[,list(N=.N,Delays=sum(ArrDelay,na.rm=TRUE),Cancelled=sum(Cancelled),Distance=mean(Distance)),by=date]
+str(daily)
+
+nts<-ts(daily$N,frequency = 7)
+plot(nts)
+
+# Arima
+library(forecast)
+auto.arima(nts)
+
+auto.arima(nts, approximation=FALSE)
+
+fit <- HoltWinters(nts)
+plot(fit)
+
+forecast(fit)
+
+f = forecast(HoltWinters(nts),5)
+f
+
+plot(f)
+
+cts <- ts(daily$Cancelled)
+fit <- auto.arima(cts)
+auto.arima(cts)
+
+# Outliers
+library(tsoutliers)
+outliers <- tso(cts, tsmethod='arima', args.tsmethod=list(order=c(1,1,2)))
+outliers
+
+plot(outliers)
+
+plot(tso(ts(daily$Cancelled)))
+
+Conclusion:
+This is the mean squared error value that showing estimation it maps
+arbitory inputs to sample values of some variables. The value of MSE should be non-
+negative and relies between 0 to 1 the above value is greater than 1 this shows great
+inaccuracy in estimation which is not useful thus to overcome this we can take
+different attribute thus MSE value closer to zero are much better.
+The TSO plot is used to find out the outliers in the dataset. Here you can
+observe the points which are out of blue line in the first graph.
+HoltWinters graph helps us to predict or forecast the future data based
+on previous data.
+Where the dark blue region shows the 95% accuracy region where light
+blue region shows 85% accurate.
+
+____________________________________________________
+
+Practical 6: Simple/Multiple Linear Regression
+
+# Simple
+house = read.csv(file.choose(),sep=",",header=T) # Open index.csv
+reg1 = lm(death_rate~hosp_avail,data = house)
+summary(reg1)
+
+plot(house$hosp_avail,house$death_rate)
+abline(reg1, col="red")
+plot(reg1)
+
+Conclusion: From the above graph it is clear that its linear
+regression and hencehosp_avail and death_rate are strongly related as p-value >0.05
+
+# Multiple
+house=read.csv(file.choose(),sep=",",header=T)
+pairs(~death_rate+doctor_avail+annual_income+density_per_capita, data=house)
+housemodel=lm(density_per_capita~death_rate+doctor_avail+hosp_avail+annual_income,data=house)
+summary(housemodel)
+
+Conclusion: By looking at the second row and second column, we can say that our independent variables posses linear
+relationship(observe how scatterplots are more or less giving a shape of a line) with our dependent variable.
+
+plot(housemodel)
+
+Conclusion:
+  From the first plot (top-left), as the fitted values along x
+increase, the residuals remain more or less constant. This
+pattern is indicated by the red line, which should be
+approximately flat if the disturbances are homoscedastic.
+The plot on the bottom left also checks this and is more
+convenient as the disturbance term in the Y-axis is
+standardized. The points appear random and the line looks
+pretty flat(top-left graph), with no increasing or decreasing
+trend. So, the condition of homoscedasticity can be accepted.
+  From the second plot(top-right), as almost all points lie on
+the line so, it is perfectly normal distributed
+
+index=read.csv(file.choose(),sep=",",header = T) # regression.csv
+names(index)
+pairs(~index+written+language+tech+gk,data=index)
+model1=lm(index~.,data=index)
+summary(model1)
+
+plot(model1)
+
+Conclusion:
+  From the first plot (top-left), as the fitted values along x
+increase, the residuals remain more or less constant. This
+pattern is indicated by the red line, which should be
+approximately flat if the disturbances are homoscedastic.
+The plot on the bottom left also checks this and is more
+convenient as the disturbance term in the Y-axis is
+standardized. The points appear random and the line looks
+pretty flat(top-left graph), with no increasing or decreasing
+trend. So, the condition of homoscedasticity can be accepted.
+  From the second plot(top-right), as almost all points lie on
+the line so, it is perfectly normal distributed
+
+index$pred=fitted(model1)
+head(index)
+
+index$res=residuals(model1)
+head(index)
+
+library(car)
+vif(model1)
+
+plot(index$pred,index$res,col="red")
+
+library(car)
+ncvTest(model1,~written+language+tech+gk)
+
+shapiro.test(index$res)
+
+library(car)
+durbinWatsonTest(model1)
+
+influencePlot(model1)
+
+Conclusion: Remove 33 as it is outliers
+
+index=index[-33,]
+library("caret")
+library("lattice")
+library("ggplot2")
+index = read.csv(file.choose(),sep = ",",header = T)
+summary(index)
+
+data=createDataPartition(index$empid,p=0.8,list=F)
+head(data)
+
+dim(data)
+
+traidata = index[data,]
+testdata = index[-data,]
+dim(traidata)
+
+dim(testdata)
+
+names(traidata)
+
+modeltrain<-lm(index~written+language+tech+gk,data=traidata)
+modeltrain$res<-residuals(modeltrain)
+RMSEtrain<-sqrt(mean(modeltrain$res**2))
+RMSEtrain
+
+testdata$pred=predict(modeltrain,testdata)
+testdata$res=testdata$index-testdata$pred
+RMSEtest<-sqrt(mean(testdata$res**2))
+RMSEtest
+
+kfolds <- trainControl(method = "cv",number = 4)
+modelkfold <- train(index~written+language+tech+gk,data = index,method="lm",trControl=kfolds)
+modelkfold
+
+Conclusion: RMSE value is less so it is stable
+
+kfoldsrp <- trainControl(method="repeatedcv",number=4,repeats=5)
+modelkfoldsrp <- train(index~written+language+tech+gk,data = index ,method="lm",trControl=kfoldsrp)
+modelkfoldsrp
+
+Conclusion: As repeating k-fold the RMSE value decreases which
+indicates that the model is stable as RMSE value is less.
+
+kfoldsloocv<-trainControl(method = "LOOCV")
+kfoldsloocvmodel<-train(index~written+language+tech+gk,data = index,method="lm",trControl=kfoldsloocv)
+kfoldsloocvmodel
+
+Conclusion: RMSE value is less so it is stable
+
+null <- lm(index~1,data=index)
+full <- lm(index~.,data = index)
+names(index)
+
+step(null,scope = list(lower=null,upper=full),direction = "forward")
+
+step(full,scope=list(lower=null,upper=full),direction = "backward")
+
+____________________________________________________
+
+Practical 7: Logistics Regression
+
+library(MASS)
+data(biopsy)
+head(biopsy)
+
+str(biopsy)
+
+biopsy$ID=NULL
+names(biopsy)=c("thick","usize","ushape","adhsn","celsiz","nucl","chrom","nuclus","mit","class")
+colSums(is.na(biopsy))
+
+biopsy1=na.omit(biopsy)
+set.seed(123)
+ind=sample(2,nrow(biopsy1),replace = TRUE,prob = c(0.7,0.3))
+train=biopsy1[ind==1,]
+test=biopsy1[ind==2,]
+str(test)
+
+table(train$class)
+
+table(test$class)
+
+fullfit=glm(class~.,family=binomial,data=train)
+summary(fullfit)
+
+exp(coef(fullfit))
+
+train$prob=predict(fullfit,type="response")
+train$prob[1:5]
+
+train$class[1:5]
+
+train$predict=rep("benign",474)
+train$predict[train$prob>0.5]="malignant"
+table(train$predict,train$class)
+
+mean(train$predict==train$class)
+
+test$prob=predict(fullfit,newdata=test,type="response")
+test$predict=rep("benign",209)
+test$predict[test$prob>0.5]="malignant"
+table(test$predict, test$class)
+
+mean(test$predict==test$class)
+
+library(ROCR)
+ROCRpred<-prediction(test$prob,test$class)
+ROCRpref<-performance(ROCRpred,'tpr','fpr')
+plot(ROCRpref,colorize=TRUE)
+
+auc=performance(ROCRpred,'auc')
+auc@y.values
+
+reducefit=glm(class~thick+nucl,family=binomial,data=train)
+summary(reducefit)
+
+train$prob=predict(reducefit,type="response")
+train$predict=rep("benign",474)
+train$predict[train$prob>0.5]="malignant"
+cf=table(train$predict,train$class)
+mean(train$predict==train$class)
+
+Conclusion: The mean of test predict and test class value is 0.9556962
+
+library(caret)
+sensitivity(cf)
+
+specificity(cf)
+
+test$prob=predict(reducefit,newdata=test,type="response")
+test$predict=rep("benign",209)
+test$predict[test$prob>0.5]="malignant"
+table(test$predict,test$class)
+
+mean(test$predict==test$class)
+
+Conclusion: The mean of test predict and test class value is 0.9282297
+
+____________________________________________________
+
+Practical 8: Hypothesis Testing
+
+Q1) test for normal distribution
+
+data1 <- read.csv(file.choose(),sep = ",",header=T)
+shapiro.test(data1$C1)
+
+Q2) "Average apple sold in a day are 97"
+"H0:mu=97"
+"H1: not H0"
+"One sample t test"
+
+apple <- read.csv(file.choose(),sep=",",header = T)
+summary(apple)
+t.test(apple$C1,alternative = "less",mu=97)
+
+Result: "Accept H0" as p-value is greater than 0.5
+
+Q3) "The company is assessing the different in salary of males and
+females."
+"Ho: Average time is equal for 2 groups"
+"H1: not H0"
+"independent t test"
+
+Salary<-read.csv(file.choose(),sep=",",header = T)
+summary(Salary)
+t.test(Salary$MALES,Salary$FEMALES,alternative = "two.side",var.equal =
+TRUE)
+
+Result: "Accept H0" as p-value is greater than 0.5
+
+Q4) "A survey was done organized to check poverty level"
+"H0:Poverty is increased"
+"H1:not H0"
+"Paried t test"
+
+poverty<-read.csv(file.choose(),sep=",",header = T)
+t.test(poverty$X1,poverty$X2,alternative = "greater",paired = T)
+
+Result: "Accept H0" as p-value is greater than 0.5
+
+Q5) "Paired t test"
+"MIS report:
+H0: Average time is equal (before and after)
+H1: average time(after) is less than"
+"paired t test"
+
+time1<-read.csv(file.choose(),sep=",",header = T)
+t.test(time1$time_before,time1$time_after, alternative = "less", paired = T)
+
+Result: "Accept H0" as p-value is greater than 0.5
+
+Q6) "To study correlation between 'apptitude' and job_prof
+H0:there is no correlation between scores and job proficiency(??=0)
+H1: aptitude scores and job
+proficiency are correlated”
+"t test for correlated"
+
+cor<-read.csv(file.choose(),sep=",",header = T)
+summary(cor)
+cor.test(cor$aptitude,cor$job_prof,alternative = "two.sided",method =
+"pearson")
+
+Result: "Reject H0" as p-value is smaller than 0.5
+
+Q7) "varience- INDEPENDENT samples t test.xls
+H0:varience and H1: no varience"
+"t test for varience"
+
+var<-read.csv(file.choose(),sep=",",header = T)
+summary(var)
+var.test(var$time_g1,var$time_g2,alternative = "two.sided")
+
+Result : "Reject H0" as p-value is smaller than 0.5
+
+
+____________________________________________________
+
+Practical 9: Analysis of Variance
+
+F-Test -
+
+ftest <- read.csv(file.choose(),sep=",",header=T)
+var.test(ftest$time_g1,ftest$time_g2,alternative = "two.sided")
+
+
+One Way Anova –
+
+data1<-read.csv(file.choose(),sep = ",",header = T)
+names(data1)
+
+summary(data1)
+
+head(data1)
+
+anv <- aov(formula = satindex~dept,data=data1)
+summary(anv)
+
+
+Pairwise Comparison –
+
+TukeyHSD(anv)
+
+
+Two Way Anova –
+
+data2<-read.csv(file.choose(),sep=",",header = T)
+names(data2)
+
+summary(data2)
+
+anv1 <- aov(formula = satindex~ dept+exp+dept*exp,data = data2)
+summary(anv1)
+
+____________________________________________________
+
+Practical 10: Decision Tree
+
+library(MASS)
+library(rpart)
+data(biopsy)
+biopsy=biopsy [ ,-1]
+names(biopsy)=c("thick","u.size","u.shape","adhsn","s.size","nucl","chrom","n.nuc","mit","class ")
+biopsy.v2=na.omit(biopsy) #delete the observations with missing values
+set.seed(123)
+ind=sample(2,nrow(biopsy.v2),replace = TRUE,prob =c(0.7,0.3))
+biop.train=biopsy.v2[ind==1,] #the training data set
+biop.test=biopsy.v2[ind==2,] #the test data set
+str(biop.test[,10])
+
+set.seed(123)
+tree.biop=rpart(class~.,method="class",data=biop.train)
+print(tree.biop$cptable)
+
+Conclusion: The value x error of maximum is 1.0000 so that we pass column 2 for pruning
+
+cp=min(tree.biop$cptable[2,])
+prune.tree.biop=prune(tree.biop,cp=cp)
+library(partykit)
+plot(as.party(tree.biop))
+
+plot(as.party(prune.tree.biop))
+
+rparty.test=predict(prune.tree.biop,newdata=biop.test,type="class")
+table(rparty.test,biop.test$class)
+
+
+Conclusion: This matrix shows that values
+1st column shows that true positive value that 136 having benign
+2nd column 1st row value shows false positive value that it predicts benign but
+They have malignant (actual value)
+2nd row 1st value shows false negative value that it predicts malignant but they
+Have benign
+2nd column 2nd row value show that true negative value that it predicts malignant and also have malignant
+
+
+library(rpart)
+library(partykit)
+library(MASS)
+library(caret)
+data(biopsy)
+biopsy = biopsy [, -1]
+names(biopsy)=c ("thick","u. size","u.shape","adhsn","s.size","nucl","chrom","n.nuc","mit","class")
+biopsy. v2=na.omit(biopsy)
+set.seed(123)
+ind=sample (2, nrow(biopsy. v2), replace = TRUE,prob =c(0.7,0.3))
+biop.train=biopsy.v2[ind==1,]
+biop.test=biopsy. v2[ind==2, ]
+str(biop.test[,10])
+
+set.seed(123)
+tree.biop=rpart(adhsn~.,data=biop.train)
+print(tree.biop$cptable)
+
+plotcp(tree.biop)
+
+cp=min(tree.biop$cptable[7,])
+prune.tree.biop=prune(tree.biop,cp=cp)
+plot(as.party(tree.biop))
+
+plot(as.party(prune.tree.biop))
+
+party.biop.test=predict(prune.tree.biop,newdata=biop.test)
+rpart.resid=party.biop.test-biop.test$adhsn
+mean(rpart.resid^2)
+
+Conclusion: This is the mean sqaured error value that showing estimation it maps
+arbitory inputs to sample values of some variables. The value of MSE
+should be non-negative and relies between 0 to 1 the above value is
+greater than 1 this shows great inaccuracy in estimation which is not
+useful thus to overcome this we can take different attribute thus MSE
+value closer to zero are much better.
